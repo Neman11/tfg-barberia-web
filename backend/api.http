@@ -1,0 +1,16 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+
+### OBTENER todos los servicios
+GET {{baseUrl}}/servicios
+
+### CREAR un nuevo servicio
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Afeitado Clásico",
+    "descripcion": "Afeitado con toalla caliente y navaja.",
+    "duracion_minutos": 25,
+    "precio": 12.50
+}

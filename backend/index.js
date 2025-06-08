@@ -1,22 +1,26 @@
-
-// Carga las variables de entorno desde el archivo .env
-require('dotenv').config(); 
+// 1. Importaciones
+require('dotenv').config();
 const express = require('express');
+const serviciosRouter = require('./routes/servicios'); // ¡Importamos el router!
 
-//Inicialización
+// 2. Inicialización
 const app = express();
 
+// 3. Middlewares
+app.use(express.json()); // ¡MUY IMPORTANTE! Para que Express entienda peticiones con cuerpo JSON
 
-// Lee el puerto desde las variables de entorno, o usa el 3001 como default
-const PORT = process.env.PORT || 3001; 
+// 4. Variables y Configuraciones
+const PORT = process.env.PORT || 3001;
 
-
-// Creamos una ruta de prueba para la raíz de la API
-app.get('/', (req, res) => {
-  res.send('¡Hola desde el backend de la barbería!');
+// 5. Rutas
+app.get('/api', (req, res) => {
+    res.send('¡API de la barbería funcionando!');
 });
 
-// Iniciar el servidor
+// Le decimos a la app que use el router de servicios para todas las rutas que empiecen con /api/servicios
+app.use('/api/servicios', serviciosRouter);
+
+// 6. Iniciar el servidor
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
