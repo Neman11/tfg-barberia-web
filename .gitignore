@@ -139,7 +139,4 @@ dist
 PORT=5000
 
 # Credenciales de la Base de Datos
-DB_USER=postgres
-DB_HOST=localhost
-DB_DATABASE=barberia_db
-DB_PORT=5432
+.env
