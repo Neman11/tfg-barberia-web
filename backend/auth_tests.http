@@ -1,0 +1,59 @@
+### =======================================
+### ARCHIVO DE PRUEBAS DE AUTENTICACIÓN
+### =======================================
+
+### Variables Globales
+@baseUrl = http://localhost:5000/api
+# Esta variable guardará el token después de un login exitoso.
+@token =  
+
+
+### 1. LOGIN (Para obtener el token)
+### REGISTRO DE BARBERO (para desarrollo)
+POST {{baseUrl}}/auth/register-barbero
+Content-Type: application/json
+
+{
+    "nombre": "Neman2",
+    "email": "Neman2@barberia.com",
+    "password": "admin",
+    "telefono": "600123458"
+}
+### Login de Barbero (Éxito)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "neman@barberia.com",
+    "password": "admin"
+}
+
+###
+
+### =======================================
+### 2. PRUEBAS DE RUTAS PROTEGIDAS
+### =======================================
+
+### Obtener Perfil de Barbero (CON TOKEN - Debería funcionar)
+GET {{baseUrl}}/barberos/perfil
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener Perfil de Barbero (SIN TOKEN - Debería fallar)
+GET {{baseUrl}}/barberos/perfil
+
+###
+
+### =======================================
+### 3. PRUEBAS DE RUTAS PÚBLICAS (Aún deben funcionar)
+### =======================================
+
+### Obtener todos los barberos (Público)
+GET {{baseUrl}}/barberos
+
+###
+
+### Obtener todos los servicios (Público)
+GET {{baseUrl}}/servicios
+
