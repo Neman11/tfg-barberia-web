@@ -1,13 +1,15 @@
 // 1. Importaciones
 require('dotenv').config();
 const express = require('express');
-const serviciosRouter = require('./routes/servicios'); // ¡Importamos el router!
+const serviciosRouter = require('./routes/servicios');
+const authRouter = require('./routes/auth');
+const barberosRouter = require('./routes/barberos');
 
 // 2. Inicialización
 const app = express();
 
 // 3. Middlewares
-app.use(express.json()); // ¡MUY IMPORTANTE! Para que Express entienda peticiones con cuerpo JSON
+app.use(express.json());
 
 // 4. Variables y Configuraciones
 const PORT = process.env.PORT || 3001;
@@ -17,8 +19,12 @@ app.get('/api', (req, res) => {
     res.send('¡API de la barbería funcionando!');
 });
 
-// Le decimos a la app que use el router de servicios para todas las rutas que empiecen con /api/servicios
+// Rutas de autenticación
+app.use('/api/auth', authRouter);
+
+// Rutas de recursos
 app.use('/api/servicios', serviciosRouter);
+app.use('/api/barberos', barberosRouter);
 
 // 6. Iniciar el servidor
 app.listen(PORT, () => {

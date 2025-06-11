@@ -1,10 +1,23 @@
 ### Variables
 @baseUrl = http://localhost:5000/api
 
+### ===== PRUEBAS DE GET =====
+
 ### OBTENER todos los servicios
 GET {{baseUrl}}/servicios
 
-### CREAR un nuevo servicio
+### OBTENER un servicio específico (ID válido)
+GET {{baseUrl}}/servicios/1
+
+### OBTENER un servicio que no existe
+GET {{baseUrl}}/servicios/999
+
+### OBTENER servicio con ID inválido
+GET {{baseUrl}}/servicios/abc
+
+### ===== PRUEBAS DE POST =====
+
+### CREAR un nuevo servicio (datos válidos)
 POST {{baseUrl}}/servicios
 Content-Type: application/json
 
@@ -14,3 +27,96 @@ Content-Type: application/json
     "duracion_minutos": 25,
     "precio": 12.50
 }
+
+### CREAR servicio sin descripción (válido - campo opcional)
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Corte Rápido",
+    "duracion_minutos": 15,
+    "precio": 8.00
+}
+
+### CREAR servicio con nombre muy corto (inválido)
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "nombre": "A",
+    "descripcion": "Descripción válida",
+    "duracion_minutos": 30,
+    "precio": 15.00
+}
+
+### CREAR servicio con duración inválida
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Servicio Test",
+    "duracion_minutos": 300,
+    "precio": 20.00
+}
+
+### CREAR servicio con precio negativo
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Servicio Gratis",
+    "duracion_minutos": 30,
+    "precio": -10
+}
+
+### CREAR servicio sin campos obligatorios
+POST {{baseUrl}}/servicios
+Content-Type: application/json
+
+{
+    "descripcion": "Solo tengo descripción"
+}
+
+### ===== PRUEBAS DE PUT =====
+
+### ACTUALIZAR un servicio (datos válidos)
+PUT {{baseUrl}}/servicios/1
+Content-Type: application/json
+
+{
+    "nombre": "Corte de Caballero Premium",
+    "descripcion": "Corte de pelo con acabado premium y productos de alta calidad",
+    "duracion_minutos": 45,
+    "precio": 25.00
+}
+
+### ACTUALIZAR servicio que no existe
+PUT {{baseUrl}}/servicios/999
+Content-Type: application/json
+
+{
+    "nombre": "Servicio Fantasma",
+    "duracion_minutos": 30,
+    "precio": 15.00
+}
+
+### ACTUALIZAR con datos inválidos
+PUT {{baseUrl}}/servicios/1
+Content-Type: application/json
+
+{
+    "nombre": "AB",
+    "duracion_minutos": -5,
+    "precio": "gratis"
+}
+
+### ===== PRUEBAS DE DELETE =====
+
+### ELIMINAR un servicio existente
+DELETE {{baseUrl}}/servicios/3
+
+### ELIMINAR un servicio que no existe
+DELETE {{baseUrl}}/servicios/999
+
+### ELIMINAR con ID inválido
+DELETE {{baseUrl}}/servicios/xyz

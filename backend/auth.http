@@ -1,0 +1,33 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+@token = 
+
+### REGISTRO DE BARBERO (para desarrollo)
+POST {{baseUrl}}/auth/register-barbero
+Content-Type: application/json
+
+{
+    "nombre": "Juan Pérez",
+    "email": "juan@barberia.com",
+    "password": "123456",
+    "telefono": "600123458"
+}
+
+### LOGIN DE BARBERO
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "juan@barberia.com",
+    "password": "123456"
+}
+
+### OBTENER TODOS LOS BARBEROS (público)
+GET {{baseUrl}}/barberos
+
+### OBTENER MI PERFIL (requiere autenticación)
+GET {{baseUrl}}/barberos/perfil
+Authorization: Bearer {{token}}
+
+### OBTENER HORARIOS DE UN BARBERO
+GET {{baseUrl}}/barberos/1/horarios
