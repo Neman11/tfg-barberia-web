@@ -1,6 +1,7 @@
 // 1. Importaciones
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors'); // NUEVA LÍNEA
 const serviciosRouter = require('./routes/servicios');
 const authRouter = require('./routes/auth');
 const barberosRouter = require('./routes/barberos');
@@ -9,6 +10,7 @@ const barberosRouter = require('./routes/barberos');
 const app = express();
 
 // 3. Middlewares
+app.use(cors()); 
 app.use(express.json());
 
 // 4. Variables y Configuraciones
