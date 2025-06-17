@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const db = require('../db');
 const router = Router();
-const { enviarEmailConfirmacion } = require('../services/emailService');
+const { enviarEmailConfirmacion } = require('./emailService');
 
 /**
  * @route   POST /api/citas

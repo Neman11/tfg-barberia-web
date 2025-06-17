@@ -53,12 +53,14 @@ const BookingPage = () => {
 
     try {
       setLoading(true);
-      const fecha = selectedDate.toISOString().split('T')[0];
+      const anio = selectedDate.getFullYear();
+      const mes = String(selectedDate.getMonth() + 1).padStart(2, '0'); 
+      const dia = String(selectedDate.getDate()).padStart(2, '0');
+      const fecha = `${anio}-${mes}-${dia}`;
       const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
         params: { fecha, duracion: selectedService.duracion_minutos }
       });
-      setAvailableSlots(response.data.huecosDisponibles || []);
-      setSelectedTime(null);
+    setAvailableSlots(response.data || []);      setSelectedTime(null);
     } catch (error) {
       setError('Error al cargar la disponibilidad');
       setAvailableSlots([]);
@@ -106,8 +108,7 @@ const BookingPage = () => {
       const citaData = {
         barbero_id: selectedBarber,
         servicio_id: selectedService.id,
-        fecha_hora: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,
-        cliente_nombre: customerData.nombre,
+        fecha_hora_inicio: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,        cliente_nombre: customerData.nombre,
         cliente_email: customerData.email,
         cliente_telefono: customerData.telefono
       };
