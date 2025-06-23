@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-fondo text-texto-principal font-inter;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair text-texto-principal;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl lg:text-7xl font-bold;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+
+  p {
+    @apply text-texto-secundario leading-relaxed;
+  }
+
+  .react-datepicker-wrapper {
+    @apply w-full;
+  }
+
+  .react-datepicker {
+    @apply bg-zinc-900 border-zinc-700 !important;
+  }
+
+  .react-datepicker__header {
+    @apply bg-zinc-800 border-zinc-700 !important;
+  }
+
+  .react-datepicker__current-month,
+  .react-datepicker__day-name {
+    @apply text-texto-principal !important;
+  }
+
+  .react-datepicker__day {
+    @apply text-texto-principal hover:bg-acento hover:text-fondo !important;
+  }
+
+  .react-datepicker__day--selected {
+    @apply bg-acento text-fondo !important;
+  }
+
+  .react-datepicker__day--disabled {
+    @apply text-zinc-600 !important;
+  }
+
+  
+}

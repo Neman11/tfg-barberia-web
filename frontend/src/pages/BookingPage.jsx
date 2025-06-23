@@ -60,7 +60,8 @@ const BookingPage = () => {
       const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
         params: { fecha, duracion: selectedService.duracion_minutos }
       });
-    setAvailableSlots(response.data || []);      setSelectedTime(null);
+      setAvailableSlots(response.data || []);      
+      setSelectedTime(null);
     } catch (error) {
       setError('Error al cargar la disponibilidad');
       setAvailableSlots([]);
@@ -108,7 +109,8 @@ const BookingPage = () => {
       const citaData = {
         barbero_id: selectedBarber,
         servicio_id: selectedService.id,
-        fecha_hora_inicio: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,        cliente_nombre: customerData.nombre,
+        fecha_hora_inicio: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,        
+        cliente_nombre: customerData.nombre,
         cliente_email: customerData.email,
         cliente_telefono: customerData.telefono
       };
@@ -138,22 +140,24 @@ const BookingPage = () => {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-8">Reservar Cita</h1>
+      <div className="max-w-4xl mx-auto p-6 pt-28">
+        <h1 className="text-5xl font-playfair font-bold mb-12 text-center text-acento animate-fade-in">
+          Reservar Cita
+        </h1>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">1. Selecciona el servicio</h2>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up">
+            <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">1. Selecciona el servicio</h2>
             <select
               value={selectedService?.id || ''}
               onChange={(e) => handleServiceChange(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             >
               <option value="">Elige un servicio...</option>
@@ -165,12 +169,12 @@ const BookingPage = () => {
             </select>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">2. Selecciona el barbero</h2>
+          <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">2. Selecciona el barbero</h2>
             <select
               value={selectedBarber || ''}
               onChange={(e) => handleBarberChange(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             >
               <option value="">Elige un barbero...</option>
@@ -183,11 +187,11 @@ const BookingPage = () => {
           </div>
 
           {selectedService && selectedBarber && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">3. Selecciona fecha y hora</h2>
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">3. Selecciona fecha y hora</h2>
+              <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Fecha</label>
+                  <label className="block text-sm font-medium mb-3 text-texto-principal">Fecha</label>
                   <DatePicker
                     selected={selectedDate}
                     onChange={handleDateChange}
@@ -195,7 +199,7 @@ const BookingPage = () => {
                     maxDate={maxDate}
                     filterDate={isWeekday}
                     dateFormat="dd/MM/yyyy"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md text-texto-principal"
                     placeholderText="Selecciona una fecha"
                     inline
                     required
@@ -204,9 +208,9 @@ const BookingPage = () => {
 
                 {selectedDate && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Hora disponible</label>
+                    <label className="block text-sm font-medium mb-3 text-texto-principal">Hora disponible</label>
                     {loading ? (
-                      <p className="text-gray-500">Cargando horarios...</p>
+                      <p className="text-texto-secundario">Cargando horarios...</p>
                     ) : availableSlots.length > 0 ? (
                       <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto">
                         {availableSlots.map((slot) => (
@@ -214,10 +218,10 @@ const BookingPage = () => {
                             key={slot}
                             type="button"
                             onClick={() => setSelectedTime(slot)}
-                            className={`p-2 text-sm rounded-md transition-colors ${
+                            className={`p-3 text-sm rounded-md transition-all duration-300 ${
                               selectedTime === slot
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200'
+                                ? 'bg-acento text-fondo'
+                                : 'bg-zinc-800 hover:bg-zinc-700 text-texto-principal'
                             }`}
                           >
                             {slot}
@@ -225,7 +229,7 @@ const BookingPage = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500">No hay horarios disponibles para esta fecha</p>
+                      <p className="text-texto-secundario">No hay horarios disponibles para esta fecha</p>
                     )}
                   </div>
                 )}
@@ -234,36 +238,36 @@ const BookingPage = () => {
           )}
 
           {selectedTime && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">4. Tus datos</h2>
-              <div className="space-y-4">
+            <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">4. Tus datos</h2>
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nombre completo</label>
+                  <label className="block text-sm font-medium mb-2 text-texto-principal">Nombre completo</label>
                   <input
                     type="text"
                     value={customerData.nombre}
                     onChange={(e) => setCustomerData({...customerData, nombre: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <label className="block text-sm font-medium mb-2 text-texto-principal">Email</label>
                   <input
                     type="email"
                     value={customerData.email}
                     onChange={(e) => setCustomerData({...customerData, email: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Teléfono</label>
+                  <label className="block text-sm font-medium mb-2 text-texto-principal">Teléfono</label>
                   <input
                     type="tel"
                     value={customerData.telefono}
                     onChange={(e) => setCustomerData({...customerData, telefono: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
                     required
                   />
                 </div>
@@ -274,7 +278,7 @@ const BookingPage = () => {
           <button
             type="submit"
             disabled={!selectedTime || !customerData.nombre || loading}
-            className={`w-full py-3 px-4 rounded-md font-medium text-white transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700`}
+            className={`w-full py-4 px-6 rounded-md font-semibold text-fondo transition-all duration-300 disabled:bg-zinc-700 disabled:cursor-not-allowed bg-acento hover:bg-acento-hover transform hover:scale-[1.02]`}
           >
             {loading ? 'Procesando...' : 'Confirmar Reserva'}
           </button>
@@ -282,9 +286,9 @@ const BookingPage = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Reserva Confirmada!</h2>
-        <p className="text-gray-600">
+        <CheckCircleIcon className="w-16 h-16 text-acento mx-auto mb-4" />
+        <h2 className="text-2xl font-playfair font-bold text-texto-principal mb-2">¡Reserva Confirmada!</h2>
+        <p className="text-texto-secundario">
           Tu cita ha sido reservada con éxito. Recibirás un email de confirmación en breve.
         </p>
       </Modal>

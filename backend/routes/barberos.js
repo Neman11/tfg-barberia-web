@@ -55,9 +55,9 @@ router.get('/:id/disponibilidad', async (req, res) => {
       'SELECT hora_inicio, hora_fin FROM horarios_barbero WHERE barbero_id = $1 AND dia_semana = $2 AND activo = true',
       [id, diaSemana]
     );
-
+    // Si el barbero no trabaja ese día, devuelve un array vacío.
     if (horarioResult.rows.length === 0) {
-      return res.json([]); // Si el barbero no trabaja ese día, devuelve un array vacío.
+      return res.json([]); 
     }
 
     const citasResult = await db.query(
@@ -99,10 +99,10 @@ router.get('/:id/disponibilidad', async (req, res) => {
       }
 
       if (!solapaConCita) {
-        huecosDisponibles.push(slotActual.toISOString().substr(11, 5)); // Formato HH:mm
+        huecosDisponibles.push(slotActual.toISOString().substr(11, 5)); 
       }
       
-      // Avanzamos al siguiente slot posible, por ejemplo, en intervalos de 15 minutos
+      
       slotActual = new Date(slotActual.getTime() + 15 * 60000);
     }
 

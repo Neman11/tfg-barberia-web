@@ -21,6 +21,8 @@ const enviarEmailConfirmacion = async (datosCita) => {
     
     const fechaFormateada = new Date(datosCita.fecha_hora_inicio).toLocaleDateString('es-ES', fechaOpciones);
     const horaFormateada = new Date(datosCita.fecha_hora_inicio).toLocaleTimeString('es-ES', horaOpciones);
+    
+    const urlCancelacion = `http://localhost:5173/cancelar-cita?token=${datosCita.token_cancelacion}`;
 
     // Opciones del email
     const mailOptions = {
@@ -34,9 +36,15 @@ const enviarEmailConfirmacion = async (datosCita) => {
         <ul>
           <li><strong>Fecha:</strong> ${fechaFormateada}</li>
           <li><strong>Hora:</strong> ${horaFormateada}</li>
-          <li><strong>Barbero ID:</strong> ${datosCita.barbero_id}</li>
-          <li><strong>Servicio ID:</strong> ${datosCita.servicio_id}</li>
+          <li><strong>Barbero :</strong> ${datosCita.barbero_nombre}</li>
+          <li><strong>Servicio :</strong> ${datosCita.servicio_nombre}</li>
         </ul>
+        <p>Si no puedes asistir, puedes cancelar tu cita haciendo clic en el siguiente enlace:</p>
+        <p style="margin: 20px 0;">
+          <a href="${urlCancelacion}" style="background-color: #e53e3e; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+            Cancelar Cita
+          </a>
+        </p>
         <p>¡Te esperamos!</p>
       `,
     };

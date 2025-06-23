@@ -6,6 +6,9 @@ import HomePage from './pages/HomePage';
 import BookingPage from './pages/BookingPage';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ContactPage from './pages/ContactPage';
+import CancellationPage from './pages/CancellationPage';
+
 
 function App() {
   return (
@@ -16,11 +19,13 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="reservar" element={<BookingPage />} />
+            <Route path="contacto" element={<ContactPage />} />
+            <Route path="/cancelar-cita" element={<CancellationPage/>} />
           </Route>
           
           {/* Ruta de login sin Layout */}
           <Route path="/login" element={<LoginPage />} />
-          
+
           {/* Rutas protegidas */}
           <Route
             path="/admin"

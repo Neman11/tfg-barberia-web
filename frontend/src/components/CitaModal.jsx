@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import api from '../services/api';
+import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from 'react-datepicker';
+import '../styles/datepicker-dark.css';
 
 function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, onCitaGuardada, onCitaEliminada }) {
   // Estado inicial del formulario
@@ -129,12 +132,12 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-left">
+        <h2 className="text-2xl font-playfair font-bold mb-4 text-left text-acento">
           {citaSeleccionada ? 'Editar Cita' : 'Nueva Cita'}
         </h2>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-left">
+          <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded mb-4 text-left">
             {error}
           </div>
         )}
@@ -142,14 +145,14 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* Selector de servicio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-texto-principal mb-1">
               Servicio
             </label>
             <select
               name="servicio_id"
               value={formData.servicio_id}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             >
               <option value="">Selecciona un servicio</option>
@@ -163,22 +166,31 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
 
           {/* Fecha y hora */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-texto-principal mb-1">
               Fecha y Hora
             </label>
-            <input
-              type="datetime-local"
-              name="fecha_hora_inicio"
-              value={formData.fecha_hora_inicio}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            <DatePicker
+              selected={formData.fecha_hora_inicio ? new Date(formData.fecha_hora_inicio) : null}
+              onChange={(date) => {
+                if (date) {
+                  const fechaFormateada = date.toISOString().slice(0, 16);
+                  handleChange({ target: { name: 'fecha_hora_inicio', value: fechaFormateada } });
+                }
+              }}
+              showTimeSelect
+              minTime={new Date(0, 0, 0, 9, 0)}
+              maxTime={new Date(0, 0, 0, 20, 45)}
+              timeIntervals={15}
+              dateFormat="dd/MM/yyyy HH:mm"
+              timeFormat="HH:mm"
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             />
           </div>
 
           {/* Datos del cliente */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-texto-principal mb-1">
               Nombre del Cliente
             </label>
             <input
@@ -186,13 +198,13 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
               name="cliente_nombre"
               value={formData.cliente_nombre}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-texto-principal mb-1">
               Email del Cliente
             </label>
             <input
@@ -200,13 +212,13 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
               name="cliente_email"
               value={formData.cliente_email}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-texto-principal mb-1">
               Teléfono del Cliente
             </label>
             <input
@@ -214,7 +226,7 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
               name="cliente_telefono"
               value={formData.cliente_telefono}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
               required
             />
           </div>
@@ -227,7 +239,7 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
                   type="button"
                   onClick={handleDelete}
                   disabled={loading}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                  className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800 disabled:opacity-50 transition-colors"
                 >
                   Eliminar
                 </button>
@@ -238,14 +250,14 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
               <button
                 type="button"
                 onClick={onClose}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                className="bg-zinc-700 text-texto-principal px-4 py-2 rounded hover:bg-zinc-600 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                className="bg-acento text-fondo px-4 py-2 rounded hover:bg-acento-hover disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Guardando...' : 'Guardar'}
               </button>

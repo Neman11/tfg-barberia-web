@@ -1,0 +1,86 @@
+.fc {
+  color: #e4e4e7;
+}
+
+.fc .fc-toolbar-title {
+  color: #ffffff;
+}
+
+.fc .fc-button-primary {
+  background-color: #bfa88b;
+  border-color: #bfa88b;
+  color: #18181b;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #ab9575;
+  border-color: #ab9575;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #ab9575;
+  border-color: #ab9575;
+  color: #18181b;
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #52525b;
+  border-color: #52525b;
+  color: #a1a1aa;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border: 1px solid #3f3f46;
+}
+
+.fc .fc-col-header-cell {
+  background-color: #18181b;
+}
+
+/* --- CORRECCIÓN 1: Días de la semana siempre en dorado --- */
+.fc .fc-col-header-cell-cushion {
+  color: #bfa88b;
+  text-decoration: none;
+}
+
+.fc .fc-daygrid-day-frame {
+  background-color: #18181b;
+}
+
+.fc .fc-day-today {
+  background-color: #27272a !important;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #e4e4e7;
+    text-decoration: none;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+  color: #bfa88b !important; 
+  font-weight: bold;
+}
+
+/* --- CORRECCIÓN 3: Fondo de la columna de horas --- */
+.fc .fc-timegrid-axis {
+    background-color: #18181b;
+}
+
+.fc .fc-timegrid-slot-lane,
+.fc .fc-timegrid-slot {
+  border-color: #3f3f46;
+}
+
+/* --- CORRECCIÓN 2: Horas siempre en dorado --- */
+.fc .fc-timegrid-slot-label-cushion {
+  color: #bfa88b;
+  text-decoration: none;
+}
+
+.fc .fc-event {
+  background-color: #bfa88b;
+  border-color: #bfa88b;
+  color: #18181b;
+  font-weight: 500;
+}

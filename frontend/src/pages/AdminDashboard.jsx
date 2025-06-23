@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import CitaModal from '../components/CitaModal';
 import api from '../services/api';
+import '../styles/fullcalendar-dark.css';
 
 /**
  * Función de ayuda para obtener el primer día de la semana (Lunes).
@@ -159,67 +159,83 @@ function AdminDashboard() {
   // --- 3. Renderizado del Componente ---
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
-        {/* Encabezado del panel */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Panel de Administración</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-          >
-            Cerrar Sesión
-          </button>
-        </div>
-
-        {/* Saludo al usuario */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-2">Bienvenido, {user?.nombre}</h2>
-          <p className="text-gray-600">Email: {user?.email}</p>
-        </div>
-
-        {/* Tarjetas de estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2 text-gray-700">Citas de Hoy</h3>
-            <p className="text-4xl font-bold text-blue-600">{stats.today}</p>
+      <div className="min-h-screen bg-fondo text-texto-principal">
+        <div className="container mx-auto px-4 py-8">
+          {/* Encabezado del panel */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-playfair font-bold text-acento">Panel de Administración</h1>
+            <button
+              onClick={handleLogout}
+              className="bg-red-700 text-white px-6 py-2 rounded-md hover:bg-red-800 transition-colors"
+            >
+              Cerrar Sesión
+            </button>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2 text-gray-700">Esta Semana</h3>
-            <p className="text-4xl font-bold text-green-600">{stats.week}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2 text-gray-700">Este Mes</h3>
-            <p className="text-4xl font-bold text-purple-600">{stats.month}</p>
-          </div>
-        </div>
 
-        {/* Calendario de FullCalendar */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <FullCalendar
-            ref={getCalendarApi}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            initialView="timeGridWeek"
-            events={fetchEvents}
-            selectable={true}
-            select={handleDateSelect}
-            eventClick={handleEventClick}
-            locale='es'
-            buttonText={{
-                today: 'Hoy',
-                month: 'Mes',
-                week:  'Semana',
-                day:   'Día'
-            }}
-            allDaySlot={false}
-            slotMinTime="09:00:00"
-            slotMaxTime="21:00:00"
-            height="auto"
-          />
+          {/* Saludo al usuario */}
+          <div className="bg-zinc-900 rounded-lg shadow-xl p-6 mb-8">
+            <h2 className="text-xl font-semibold mb-2 text-texto-principal">Bienvenido, {user?.nombre}</h2>
+            <p className="text-texto-secundario">Email: {user?.email}</p>
+          </div>
+
+          {/* Tarjetas de estadísticas */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-zinc-900 rounded-lg shadow-xl p-6 text-center">
+              <h3 className="text-lg font-semibold mb-2 text-texto-secundario">Citas de Hoy</h3>
+              <p className="text-4xl font-bold text-acento">{stats.today}</p>
+            </div>
+            <div className="bg-zinc-900 rounded-lg shadow-xl p-6 text-center">
+              <h3 className="text-lg font-semibold mb-2 text-texto-secundario">Esta Semana</h3>
+              <p className="text-4xl font-bold text-acento">{stats.week}</p>
+            </div>
+            <div className="bg-zinc-900 rounded-lg shadow-xl p-6 text-center">
+              <h3 className="text-lg font-semibold mb-2 text-texto-secundario">Este Mes</h3>
+              <p className="text-4xl font-bold text-acento">{stats.month}</p>
+            </div>
+          </div>
+
+          {/* Calendario de FullCalendar */}
+          <div className="bg-zinc-900 rounded-lg shadow-xl p-6">
+            <FullCalendar
+              ref={getCalendarApi}
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              }}
+              initialView="timeGridWeek"
+              events={fetchEvents}
+              selectable={true}
+              select={handleDateSelect}
+              eventClick={handleEventClick}
+              locale='es'
+              buttonText={{
+                  today: 'Hoy',
+                  month: 'Mes',
+                  week:  'Semana',
+                  day:   'Día'
+              }}
+              allDaySlot={false}
+              slotMinTime="09:00:00"
+              slotMaxTime="21:00:00"
+              slotDuration="00:15:00"
+              slotLabelInterval="00:15"
+              slotLabelFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+                }}
+              expandRows={true}
+              height="auto"
+              eventDisplay="block"
+              displayEventTime={true}
+              displayEventEnd={true}
+              eventTextColor="#111111"
+              eventBackgroundColor="#bfa88b"
+              eventBorderColor="#bfa88b"
+            />
+          </div>
         </div>
       </div>
 

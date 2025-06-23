@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const crypto = require('crypto');
 const db = require('../db');
 const router = Router();
 const { enviarEmailConfirmacion } = require('./emailService');
@@ -10,6 +11,7 @@ const { authenticateBarbero } = require('../middlewares/auth');
  * @access  Privado - Solo barberos autenticados
  * @query   start=YYYY-MM-DD&end=YYYY-MM-DD
  */
+
 router.get('/', authenticateBarbero, async (req, res) => {
   const { start, end } = req.query;
   const barberoId = req.barbero.id; // ID del barbero autenticado
@@ -39,12 +41,23 @@ router.get('/', authenticateBarbero, async (req, res) => {
     
     const queryParams = [barberoId];
     
-    // Agregar filtros de fecha si se proporcionan
+    // Validar y añadir los filtros de fecha solo si existen y son correctos
     if (start && end) {
-      query += ` AND c.fecha_hora_inicio >= $2 AND c.fecha_hora_inicio <= $3`;
-      queryParams.push(start, end);
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      // Comprobar la validez de las fechas
+      if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+        query += ` AND c.fecha_hora_inicio >= $2 AND c.fecha_hora_inicio <= $3`;
+        queryParams.push(startDate.toISOString(), endDate.toISOString());
+      } else {
+        // Si las fechas son inválidas, se podría registrar un aviso pero no se detiene la ejecución,
+        // simplemente no se aplicará el filtro de fecha.
+        console.warn('Se recibieron fechas inválidas, se devolverán todas las citas:', { start, end });
+      }
     }
     
+    // Añadir siempre la ordenación al final
     query += ` ORDER BY c.fecha_hora_inicio ASC`;
     
     const { rows } = await db.query(query, queryParams);
@@ -88,7 +101,11 @@ router.post('/', async (req, res) => {
     cliente_email,
     cliente_telefono
   } = req.body;
-
+  
+  const minutos = new Date(fecha_hora_inicio).getMinutes();
+  if (minutos % 15 !== 0) {
+    return res.status(400).json({ message: 'La hora de la cita debe ser en un intervalo de 15 minutos (ej: 10:00, 10:15).' });
+  }
   if (!barbero_id || !servicio_id || !fecha_hora_inicio || !cliente_nombre || !cliente_email || !cliente_telefono) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
   }
@@ -117,19 +134,36 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ message: 'El horario seleccionado ya no está disponible. Por favor, elija otro.' });
     }
 
+    const tokenCancelacion = crypto.randomBytes(32).toString('hex');
+
     const citaQuery = `
-      INSERT INTO citas (barbero_id, servicio_id, fecha_hora_inicio, fecha_hora_fin, cliente_nombre_nr, cliente_email_nr, cliente_telefono_nr)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO citas (barbero_id, servicio_id, fecha_hora_inicio, fecha_hora_fin, cliente_nombre_nr, cliente_email_nr, cliente_telefono_nr, token_cancelacion)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *;
     `;
-    const citaValues = [barbero_id, servicio_id, fechaInicio.toISOString(), fechaFin.toISOString(), cliente_nombre, cliente_email, cliente_telefono];
+    const citaValues = [barbero_id, servicio_id, fechaInicio.toISOString(), fechaFin.toISOString(), cliente_nombre, cliente_email, cliente_telefono, tokenCancelacion];
     const nuevaCitaResult = await client.query(citaQuery, citaValues);
     const nuevaCita = nuevaCitaResult.rows[0];
 
     await client.query('COMMIT');
+    const barberoResult = await client.query('SELECT nombre FROM barberos WHERE id = $1', [nuevaCita.barbero_id]);
+    const servicioInfoResult = await client.query('SELECT nombre FROM servicios WHERE id = $1', [nuevaCita.servicio_id]);
+
+    const barberoNombre = barberoResult.rows[0]?.nombre || 'No especificado';
+    const servicioNombre = servicioInfoResult.rows[0]?.nombre || 'No especificado';
+    
+    //Construir el objeto de datos para el email con los nombres.
+    const datosParaEmail = {
+      cliente_email_nr: nuevaCita.cliente_email_nr,
+      cliente_nombre_nr: nuevaCita.cliente_nombre_nr,
+      fecha_hora_inicio: nuevaCita.fecha_hora_inicio,
+      barbero_nombre: barberoNombre,  
+      servicio_nombre: servicioNombre, 
+      token_cancelacion: nuevaCita.token_cancelacion
+    };
 
     // Enviar email de confirmación
-    enviarEmailConfirmacion(nuevaCita);
+    enviarEmailConfirmacion(datosParaEmail);
 
     res.status(201).json({
       message: 'Cita reservada con éxito.',
@@ -288,6 +322,30 @@ router.put('/:id', authenticateBarbero, async (req, res) => {
   }
 });
 
+/**
+ * @route   POST /api/citas/cancelar/:token
+ * @desc    Cancela una cita usando el token de cancelación
+ * @access  Público (la seguridad la da el token)
+ */
+  router.post('/cancelar/:token', async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const result = await db.query(
+      "UPDATE citas SET estado = 'cancelada' WHERE token_cancelacion = $1 AND estado = 'confirmada' RETURNING *",
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      // Esto puede pasar si el token es inválido o la cita ya fue cancelada.
+      return res.status(404).json({ message: 'No se pudo cancelar la cita. El enlace puede ser inválido o haber expirado.' });
+    }
+    res.json({ message: 'Tu cita ha sido cancelada con éxito.' });
+  } catch (error) {
+    console.error('Error al cancelar cita:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
 /**
  * @route   DELETE /api/citas/:id
  * @desc    Eliminar una cita
