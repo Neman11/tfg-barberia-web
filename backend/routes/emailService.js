@@ -22,7 +22,7 @@ const enviarEmailConfirmacion = async (datosCita) => {
     const fechaFormateada = new Date(datosCita.fecha_hora_inicio).toLocaleDateString('es-ES', fechaOpciones);
     const horaFormateada = new Date(datosCita.fecha_hora_inicio).toLocaleTimeString('es-ES', horaOpciones);
     
-    const urlCancelacion = `http://localhost:5173/cancelar-cita?token=${datosCita.token_cancelacion}`;
+    const urlCancelacion = `http://localhost:5173/cancelar-cita?token=${datosCita.token_cancelacion}`;;
 
     // Opciones del email
     const mailOptions = {

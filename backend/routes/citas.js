@@ -327,23 +327,46 @@ router.put('/:id', authenticateBarbero, async (req, res) => {
  * @desc    Cancela una cita usando el token de cancelación
  * @access  Público (la seguridad la da el token)
  */
-  router.post('/cancelar/:token', async (req, res) => {
+router.post('/cancelar/:token', async (req, res) => {
   const { token } = req.params;
 
   try {
-    const result = await db.query(
-      "UPDATE citas SET estado = 'cancelada' WHERE token_cancelacion = $1 AND estado = 'confirmada' RETURNING *",
+    // 1. Primero, busca la cita por el token sin importar su estado
+    const citaExistenteResult = await db.query(
+      "SELECT id, estado FROM citas WHERE token_cancelacion = $1",
       [token]
     );
 
-    if (result.rows.length === 0) {
-      // Esto puede pasar si el token es inválido o la cita ya fue cancelada.
-      return res.status(404).json({ message: 'No se pudo cancelar la cita. El enlace puede ser inválido o haber expirado.' });
+    // Si no se encuentra ninguna cita con ese token
+    if (citaExistenteResult.rows.length === 0) {
+      return res.status(404).json({ message: 'El enlace de cancelación es inválido o no corresponde a ninguna cita.' });
     }
+
+    const cita = citaExistenteResult.rows[0];
+
+    // 2. Comprueba el estado de la cita encontrada
+    if (cita.estado === 'cancelada') {
+      // Si ya está cancelada, informa al usuario y termina con éxito.
+      return res.json({ message: 'Esta cita ya había sido cancelada anteriormente.' });
+    }
+    
+    if (cita.estado !== 'confirmada') {
+        // Manejar otros posibles estados si los hubiera
+        return res.status(400).json({ message: `No se puede cancelar una cita que tiene el estado '${cita.estado}'.` });
+    }
+
+    // 3. Si la cita existe y está 'confirmada', procede a cancelarla
+    await db.query(
+      "UPDATE citas SET estado = 'cancelada' WHERE id = $1",
+      [cita.id]
+    );
+
+    // Responde con el mensaje de éxito
     res.json({ message: 'Tu cita ha sido cancelada con éxito.' });
+
   } catch (error) {
     console.error('Error al cancelar cita:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'Error interno del servidor al intentar cancelar la cita.' });
   }
 });
 /**
