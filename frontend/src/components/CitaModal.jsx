@@ -105,7 +105,7 @@ function CitaModal({ isOpen, onClose, citaSeleccionada, fechaPreseleccionada, on
   const handleDelete = async () => {
     if (!citaSeleccionada?.id) return;
     
-    if (!window.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+    if (!window.confirm('¿Estás seguro de que deseas cancelar la cita?')) {
       return;
     }
 

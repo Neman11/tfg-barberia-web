@@ -36,7 +36,7 @@ router.get('/', authenticateBarbero, async (req, res) => {
       FROM citas c
       INNER JOIN servicios s ON c.servicio_id = s.id
       INNER JOIN barberos b ON c.barbero_id = b.id
-      WHERE c.barbero_id = $1
+      WHERE c.barbero_id = $1 AND c.estado <> 'cancelada'
     `;
     
     const queryParams = [barberoId];
@@ -379,25 +379,25 @@ router.delete('/:id', authenticateBarbero, async (req, res) => {
   const barberoId = req.barbero.id;
 
   try {
-    // Verificar que la cita pertenece al barbero autenticado antes de eliminar
+    // En lugar de DELETE, hacemos un UPDATE para cambiar el estado
     const result = await db.query(
-      'DELETE FROM citas WHERE id = $1 AND barbero_id = $2 RETURNING *',
+      "UPDATE citas SET estado = 'cancelada' WHERE id = $1 AND barbero_id = $2 RETURNING *",
       [id, barberoId]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ 
-        message: 'Cita no encontrada o no autorizada para eliminar' 
+        message: 'Cita no encontrada o no autorizada para cancelar' 
       });
     }
 
     res.json({ 
-      message: 'Cita eliminada con éxito',
+      message: 'Cita cancelada con éxito', 
       cita: result.rows[0]
     });
 
   } catch (error) {
-    console.error('Error al eliminar cita:', error);
+    console.error('Error al cancelar cita:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
