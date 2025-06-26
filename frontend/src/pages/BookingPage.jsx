@@ -48,27 +48,39 @@ const BookingPage = () => {
     }
   };
 
-  const cargarDisponibilidad = async () => {
-    if (!selectedBarber || !selectedDate || !selectedService) return;
+const cargarDisponibilidad = async () => {
+  if (!selectedBarber || !selectedDate || !selectedService) return;
 
-    try {
-      setLoading(true);
-      const anio = selectedDate.getFullYear();
-      const mes = String(selectedDate.getMonth() + 1).padStart(2, '0'); 
-      const dia = String(selectedDate.getDate()).padStart(2, '0');
-      const fecha = `${anio}-${mes}-${dia}`;
-      const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
-        params: { fecha, duracion: selectedService.duracion_minutos }
-      });
-      setAvailableSlots(response.data || []);      
-      setSelectedTime(null);
-    } catch (error) {
-      setError('Error al cargar la disponibilidad');
-      setAvailableSlots([]);
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    const anio = selectedDate.getFullYear();
+    const mes = String(selectedDate.getMonth() + 1).padStart(2, '0'); 
+    const dia = String(selectedDate.getDate()).padStart(2, '0');
+    const fecha = `${anio}-${mes}-${dia}`;
+    
+    const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
+      params: { fecha, duracion: selectedService.duracion_minutos }
+    });
+    
+    // Manejar tanto el formato nuevo como el anterior
+    let slots = [];
+    
+    if (response.data.success) {
+      slots = response.data.data || [];
+    } else {
+      slots = Array.isArray(response.data) ? response.data : [];
     }
-  };
+    
+    setAvailableSlots(slots);
+    setSelectedTime(null);
+    
+  } catch (error) {
+    setError('Error al cargar la disponibilidad');
+    setAvailableSlots([]);
+  } finally {
+    setLoading(false);
+  }
+};
   
   const resetForm = () => {
     setSelectedService(null);

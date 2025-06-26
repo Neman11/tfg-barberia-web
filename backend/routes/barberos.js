@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const db = require('../db');
 const { authenticateBarbero } = require('../middlewares/auth');
+const DatabaseService = require('../services/DatabaseService');
 
 const router = Router();
 
@@ -34,83 +35,50 @@ router.get('/perfil', authenticateBarbero, async (req, res) => {
 
 
 /**
- * @route   GET /api/barberos/:id/disponibilidad
- * @desc    Calcula los huecos de citas disponibles para un barbero en una fecha específica
- * @access  Público
- * @query   fecha=YYYY-MM-DD
- * @query   duracion=30 (en minutos)
+ * GET /api/barberos/:id/disponibilidad - Calcular disponibilidad optimizada
+ * Optimización: Una consulta con subconsultas en lugar de consultas separadas
  */
-router.get('/:id/disponibilidad', async (req, res) => {
-  const { id } = req.params;
-  const { fecha, duracion } = req.query;
-
-  if (!fecha || !duracion) {
-    return res.status(400).json({ message: 'Se requiere una fecha y una duración del servicio.' });
-  }
-
-  const diaSemana = new Date(fecha).getDay();
-
+router.get('/:id/disponibilidad', async (req, res, next) => {
   try {
-    const horarioResult = await db.query(
-      'SELECT hora_inicio, hora_fin FROM horarios_barbero WHERE barbero_id = $1 AND dia_semana = $2 AND activo = true',
-      [id, diaSemana]
-    );
-    // Si el barbero no trabaja ese día, devuelve un array vacío.
-    if (horarioResult.rows.length === 0) {
-      return res.json([]); 
+    const { id } = req.params;
+    const { fecha, duracion } = req.query;
+
+    // Validaciones
+    if (!fecha || !duracion) {
+      return next(new AppError('Se requiere fecha y duración del servicio', 400));
     }
 
-    const citasResult = await db.query(
-      'SELECT fecha_hora_inicio, fecha_hora_fin FROM citas WHERE barbero_id = $1 AND fecha_hora_inicio::date = $2',
-      [id, fecha]
-    );
-
-    const horario = horarioResult.rows[0];
-    const citas = citasResult.rows;
-    const duracionServicio = parseInt(duracion, 10);
-
-    const huecosDisponibles = [];
-    const fechaSeleccionada = new Date(fecha + 'T00:00:00.000Z');
-
-    const [inicioH, inicioM] = horario.hora_inicio.split(':');
-    let slotActual = new Date(fechaSeleccionada.getTime());
-    slotActual.setUTCHours(inicioH, inicioM, 0, 0);
-
-    const [finH, finM] = horario.hora_fin.split(':');
-    let horaFinTrabajo = new Date(fechaSeleccionada.getTime());
-    horaFinTrabajo.setUTCHours(finH, finM, 0, 0);
-
-    while (slotActual < horaFinTrabajo) {
-      let slotFin = new Date(slotActual.getTime() + duracionServicio * 60000);
-
-      if (slotFin > horaFinTrabajo) {
-        break; 
-      }
-
-      let solapaConCita = false;
-      for (const cita of citas) {
-        const citaInicio = new Date(cita.fecha_hora_inicio);
-        const citaFin = new Date(cita.fecha_hora_fin);
-
-        if (slotActual < citaFin && slotFin > citaInicio) {
-          solapaConCita = true;
-          break;
-        }
-      }
-
-      if (!solapaConCita) {
-        huecosDisponibles.push(slotActual.toISOString().substr(11, 5)); 
-      }
-      
-      
-      slotActual = new Date(slotActual.getTime() + 15 * 60000);
+    if (isNaN(id)) {
+      return next(new AppError('ID de barbero inválido', 400));
     }
 
-    res.json(huecosDisponibles);
+    const duracionMinutos = parseInt(duracion, 10);
+    if (isNaN(duracionMinutos) || duracionMinutos < 5 || duracionMinutos > 240) {
+      return next(new AppError('Duración debe ser entre 5 y 240 minutos', 400));
+    }
+
+    const fechaObj = new Date(fecha);
+    if (isNaN(fechaObj.getTime())) {
+      return next(new AppError('Formato de fecha inválido', 400));
+    }
+
+    // Usar consulta optimizada
+    const disponibilidad = await DatabaseService.obtenerDisponibilidadCompleta(
+      parseInt(id, 10),
+      fecha,
+      duracionMinutos
+    );
+
+    res.json({
+      success: true,
+      fecha,
+      duracion_minutos: duracionMinutos,
+      slots_disponibles: disponibilidad.length,
+      data: disponibilidad
+    });
 
   } catch (error) {
-    console.error("Error al calcular disponibilidad:", error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    next(error);
   }
 });
 

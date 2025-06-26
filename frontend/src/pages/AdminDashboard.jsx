@@ -46,39 +46,24 @@ function AdminDashboard() {
    * Se usa `useCallback` para evitar que la función se recree en cada render,
    * optimizando el rendimiento.
    */
-  const fetchStats = useCallback(async () => {
-    try {
-      const today = new Date();
-      // Definimos los rangos de fechas para las consultas
-      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-      const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString();
-      
-      const startOfWeek = getStartOfWeek(new Date()).toISOString();
-      const endOfWeekDate = new Date(startOfWeek);
-      endOfWeekDate.setDate(endOfWeekDate.getDate() + 6);
-      const endOfWeek = endOfWeekDate.toISOString();
+const fetchStats = useCallback(async () => {
+  try {
+    // Una sola llamada API para todas las estadísticas
+    const response = await api.get('/citas/estadisticas');
+    
+    // La respuesta ya viene con el formato correcto
+    setStats(response.data.data);
 
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
-
-      // Realizamos las 3 llamadas a la API en paralelo para mayor eficiencia.
-      const [todayRes, weekRes, monthRes] = await Promise.all([
-        api.get(`/citas?start=${startOfToday}&end=${endOfToday}`),
-        api.get(`/citas?start=${startOfWeek}&end=${endOfWeek}`),
-        api.get(`/citas?start=${startOfMonth}&end=${endOfMonth}`)
-      ]);
-      
-      // Actualizamos el estado con la cantidad de citas recibidas en cada llamada.
-      setStats({
-        today: todayRes.data.length,
-        week: weekRes.data.length,
-        month: monthRes.data.length,
-      });
-
-    } catch (error) {
-      console.error("Error al cargar las estadísticas:", error);
-    }
-  }, []);
+  } catch (error) {
+    console.error("Error al cargar las estadísticas:", error);
+    // Fallback a valores por defecto en caso de error
+    setStats({
+      today: 0,
+      week: 0,
+      month: 0
+    });
+  }
+}, []);
 
   // Hook `useEffect` para cargar las estadísticas iniciales cuando el componente se monta.
   useEffect(() => {
@@ -147,14 +132,39 @@ function AdminDashboard() {
    * @param {function} failureCallback 
    */
   const fetchEvents = async (fetchInfo, successCallback, failureCallback) => {
-    try {
-      const response = await api.get(`/citas?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`);
-      successCallback(response.data);
-    } catch (error) {
-      console.error('Error al cargar las citas:', error);
+  try {
+    const response = await api.get(`/citas?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`);
+        
+    // Extraer los eventos del formato de respuesta del backend
+    let eventos = [];
+    
+    if (response.data.success && Array.isArray(response.data.data)) {
+      // Formato nuevo con {success: true, data: [...]}
+      eventos = response.data.data;
+    } else if (Array.isArray(response.data)) {
+      // Formato anterior (array directo)
+      eventos = response.data;
+    } else {
+      console.error('Formato de respuesta inesperado:', response.data);
+      failureCallback(new Error('Formato de respuesta inválido'));
+      return;
+    }
+    
+    // FullCalendar espera directamente el array de eventos
+    successCallback(eventos);
+    
+  } catch (error) {
+    console.error('Error al cargar las citas:', error);
+    
+    // Proporcionar información más detallada del error
+    if (error.response) {
+      console.error('Respuesta del error:', error.response.data);
+      failureCallback(new Error(`Error ${error.response.status}: ${error.response.data.message || 'Error del servidor'}`));
+    } else {
       failureCallback(error);
     }
-  };
+  }
+};
 
   // --- 3. Renderizado del Componente ---
   return (

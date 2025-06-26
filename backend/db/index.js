@@ -1,17 +1,31 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const config = require('../config');
 
-// Esto es más eficiente que crear una conexión nueva para cada consulta.
+
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  user: config.database.user,
+  host: config.database.host,
+  database: config.database.database,
+  password: config.database.password,
+  port: config.database.port,
+  // Configuraciones adicionales del pool
+  max: config.database.max,
+  idleTimeoutMillis: config.database.idleTimeoutMillis,
+  connectionTimeoutMillis: config.database.connectionTimeoutMillis,
 });
 
-// Este método usará el pool para enviar consultas a la base de datos.
+// Evento para logging de conexiones
+pool.on('connect', (client) => {
+  console.log('📡 Nueva conexión a la base de datos establecida');
+});
+
+pool.on('error', (err, client) => {
+  console.error('❌ Error inesperado en el pool de base de datos:', err);
+});
+
 module.exports = {
   query: (text, params) => pool.query(text, params),
   getClient: () => pool.connect(),
+  pool // Exportar el pool para poder cerrarlo si es necesario
 };
+

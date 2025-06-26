@@ -1,26 +1,28 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config');
 
-// Clave secreta para JWT (en producción debería estar en .env)
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_desarrollo';
-
-// Middleware para verificar token de barbero
 const authenticateBarbero = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
-    return res.status(401).json({ message: 'Acceso denegado. Token no proporcionado.' });
+    return res.status(401).json({ 
+      success: false,
+      message: 'Acceso denegado. Token no proporcionado.' 
+    });
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwt.secret);
     req.barbero = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token inválido o expirado' });
+    console.error('Error verificando token:', error.message);
+    res.status(401).json({ 
+      success: false,
+      message: 'Token inválido o expirado' 
+    });
   }
 };
-
-// Función para generar token
 const generateToken = (barbero) => {
   return jwt.sign(
     { 
@@ -28,8 +30,11 @@ const generateToken = (barbero) => {
       email: barbero.email,
       nombre: barbero.nombre 
     },
-    JWT_SECRET,
-    { expiresIn: '24h' }
+    config.jwt.secret,
+    { 
+      expiresIn: config.jwt.expiresIn,
+      algorithm: config.jwt.algorithm
+    }
   );
 };
 
