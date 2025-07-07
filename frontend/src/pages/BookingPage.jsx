@@ -110,8 +110,11 @@ const BookingPage = () => {
 
     setLoading(true);
     try {
-      const fechaISO = selectedDate.toISOString().split('T')[0];
-      const fechaHoraInicio = `${fechaISO}T${selectedTime}:00`;
+      const anio = selectedDate.getFullYear();
+      const mes = String(selectedDate.getMonth() + 1).padStart(2, '0'); 
+      const dia = String(selectedDate.getDate()).padStart(2, '0');
+      const fechaLocal = `${anio}-${mes}-${dia}`;
+      const fechaHoraInicio = `${fechaLocal}T${selectedTime}:00`;
 
       const citaData = {
         barbero_id: selectedBarber,

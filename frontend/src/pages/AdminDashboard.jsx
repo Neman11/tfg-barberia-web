@@ -50,7 +50,6 @@ const fetchStats = useCallback(async () => {
     // Una sola llamada API para todas las estadísticas
     const response = await api.get('/citas/estadisticas');
     
-    // La respuesta ya viene con el formato correcto
     setStats(response.data.data);
 
   } catch (error) {
@@ -79,7 +78,11 @@ const fetchStats = useCallback(async () => {
 
   // Se activa cuando el usuario selecciona un rango de fechas en el calendario.
   const handleDateSelect = (selectInfo) => {
-    setPreselectedDate(selectInfo.startStr); // Guardamos la fecha/hora de inicio
+    const fechaLocal = new Date(selectInfo.start);
+    const offsetLocal = fechaLocal.getTimezoneOffset() * 60000;
+    const fechaCorregida = new Date(fechaLocal.getTime() - offsetLocal);
+    const fechaFormateada = fechaCorregida.toISOString().slice(0, 16);
+    setPreselectedDate(fechaFormateada); // Guardamos la fecha/hora de inicio
     setSelectedCita(null); // Nos aseguramos de que no hay ninguna cita seleccionada para editar
     setModalIsOpen(true); // Abrimos el modal
   };
@@ -219,6 +222,7 @@ const fetchStats = useCallback(async () => {
               select={handleDateSelect}
               eventClick={handleEventClick}
               locale='es'
+              timeZone='Europe/Madrid'
               buttonText={{
                   today: 'Hoy',
                   month: 'Mes',

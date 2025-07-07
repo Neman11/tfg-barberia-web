@@ -89,8 +89,9 @@ static async obtenerDisponibilidadCompleta(barberoId, fecha, duracionMinutos) {
       SELECT fecha_hora_inicio, fecha_hora_fin
       FROM citas 
       WHERE barbero_id = $1 
-        AND fecha_hora_inicio::date = $3::date
         AND estado != 'cancelada'
+        AND fecha_hora_inicio >= $3::date 
+        AND fecha_hora_inicio < ($3::date + '1 day'::interval)
     )
     SELECT 
       h.hora_inicio,
