@@ -16,7 +16,6 @@ function ContactPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Por ahora solo visual
     alert('Mensaje enviado (funcionalidad no implementada)');
     setFormData({ nombre: '', email: '', mensaje: '' });
   };

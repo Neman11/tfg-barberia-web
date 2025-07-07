@@ -36,7 +36,6 @@ router.get('/perfil', authenticateBarbero, async (req, res) => {
 
 /**
  * GET /api/barberos/:id/disponibilidad - Calcular disponibilidad optimizada
- * Optimización: Una consulta con subconsultas en lugar de consultas separadas
  */
 router.get('/:id/disponibilidad', async (req, res, next) => {
   try {

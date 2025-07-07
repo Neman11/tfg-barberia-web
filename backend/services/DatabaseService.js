@@ -138,6 +138,7 @@ static async obtenerDisponibilidadCompleta(barberoId, fecha, duracionMinutos) {
 
     const huecos = [];
     let slotActual = new Date(horaInicio);
+    const ahora = new Date();
 
     while (slotActual < horaFin) {
       const slotFin = new Date(slotActual.getTime() + duracionMinutos * 60000);
@@ -150,7 +151,7 @@ static async obtenerDisponibilidadCompleta(barberoId, fecha, duracionMinutos) {
         return slotActual < citaFin && slotFin > citaInicio;
       });
 
-      if (!seSuperpone) {
+      if (!seSuperpone && slotActual > ahora) {
         huecos.push(slotActual.toISOString().substr(11, 5));
       }
 

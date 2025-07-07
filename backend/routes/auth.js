@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
 
     const barbero = rows[0];
 
-    // Verificar contraseña
+    // Verificar contraseña usando bcrypt
     const isPasswordValid = await bcrypt.compare(password, barbero.password_hash);
     
     if (!isPasswordValid) {

@@ -16,8 +16,6 @@ const errorHandler = (err, req, res, next) => {
     method: req.method,
     timestamp: new Date().toISOString()
   });
-
-  // Estructura de respuesta consistente
   let error = {
     success: false,
     message: err.message || 'Error interno del servidor',

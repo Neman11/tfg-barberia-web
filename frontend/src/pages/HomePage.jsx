@@ -31,18 +31,16 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center">
-        {/* Imagen de fondo con overlay */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2070)',
+            backgroundImage: 'url(/images/hero-background.webp)',
           }}
         >
           <div className="absolute inset-0 bg-black opacity-70"></div>
         </div>
-        
+
         {/* Contenido */}
         <div className="relative z-10 text-center px-4 animate-fade-in">
           <h1 className="mb-6 text-acento">
@@ -51,7 +49,7 @@ function HomePage() {
           <p className="text-xl md:text-2xl text-texto-principal mb-10 max-w-2xl mx-auto">
             Donde el estilo clásico se encuentra con la elegancia moderna
           </p>
-          <Link 
+          <Link
             to="/reservar"
             className="inline-block bg-acento hover:bg-acento-hover text-fondo px-10 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
           >
@@ -66,7 +64,7 @@ function HomePage() {
           <h2 className="text-center mb-16 text-acento animate-fade-in-up">
             Nuestros Servicios
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {servicios.map((servicio, index) => (
               <div
@@ -101,19 +99,20 @@ function HomePage() {
             <div className="animate-fade-in-up">
               <h2 className="mb-8 text-acento">Un Espacio Único</h2>
               <p className="text-lg leading-relaxed mb-6">
-                Nuestra barbería combina la tradición del oficio clásico con un ambiente moderno y sofisticado. 
+                Nuestra barbería combina la tradición del oficio clásico con un ambiente moderno y sofisticado.
                 Cada detalle ha sido cuidadosamente seleccionado para crear una experiencia única y memorable.
               </p>
               <p className="text-lg leading-relaxed">
-                Desde el momento en que cruzas nuestra puerta, te sumergirás en un ambiente donde 
+                Desde el momento en que cruzas nuestra puerta, te sumergirás en un ambiente donde
                 el tiempo se detiene y el cuidado personal se convierte en un ritual de excelencia.
               </p>
             </div>
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <img 
-                src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=2070" 
-                alt="Interior de la barbería" 
+              <img
+                src="/images/barberia-interior.webp"
+                alt="Interior de la barbería con sillones de cuero y espejos iluminados"
                 className="rounded-lg shadow-2xl w-full h-[500px] object-cover"
+                loading="lazy"
               />
             </div>
           </div>

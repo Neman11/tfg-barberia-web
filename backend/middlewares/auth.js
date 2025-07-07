@@ -5,21 +5,24 @@ const authenticateBarbero = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
-    return res.status(401).json({ 
+    return res.status(401).json({
       success: false,
-      message: 'Acceso denegado. Token no proporcionado.' 
+      message: 'Acceso denegado. Token no proporcionado.'
     });
   }
 
   try {
+    // Verifica el token; si es válido, el payload decodificado se añade a la petición.
     const decoded = jwt.verify(token, config.jwt.secret);
     req.barbero = decoded;
+    
+    // Continúa con la siguiente función del middleware.
     next();
   } catch (error) {
-    console.error('Error verificando token:', error.message);
-    res.status(401).json({ 
+    // Si el token es inválido o expiró, devuelve un error.
+    res.status(401).json({
       success: false,
-      message: 'Token inválido o expirado' 
+      message: 'Token inválido o expirado'
     });
   }
 };

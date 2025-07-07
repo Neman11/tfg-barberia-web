@@ -1,4 +1,3 @@
-// backend/routes/citas.js (REEMPLAZAR EL CONTENIDO ACTUAL)
 const { Router } = require('express');
 const { authenticateBarbero } = require('../middlewares/auth');
 const { AppError } = require('../middlewares/errorHandler');
@@ -11,7 +10,6 @@ const router = Router();
 
 /**
  * GET /api/citas - Obtener citas con información completa
- * Optimización: Una sola consulta con JOINs en lugar de múltiples consultas
  */
 router.get('/', authenticateBarbero, async (req, res, next) => {
   try {
@@ -23,7 +21,7 @@ router.get('/', authenticateBarbero, async (req, res, next) => {
     
     if (start && end) {
       try {
-        // Arreglar el formato de fecha: reemplazar espacio por +
+        // formato de fecha: reemplazar espacio por +
         const startFixed = start.replace(/ (\d{2}):(\d{2})$/, '+$1:$2');
         const endFixed = end.replace(/ (\d{2}):(\d{2})$/, '+$1:$2');
         
@@ -61,7 +59,6 @@ router.get('/', authenticateBarbero, async (req, res, next) => {
 
 /**
  * GET /api/citas/estadisticas - Obtener estadísticas del barbero
- * Optimización: Una consulta con COUNT FILTER en lugar de consultas separadas
  */
 router.get('/estadisticas', authenticateBarbero, async (req, res, next) => {
   try {
@@ -80,7 +77,6 @@ router.get('/estadisticas', authenticateBarbero, async (req, res, next) => {
 
 /**
  * POST /api/citas - Crear nueva cita
- * Optimización: Verificación de disponibilidad con EXISTS en lugar de COUNT
  */
 router.post('/', async (req, res, next) => {
   try {
@@ -171,14 +167,14 @@ router.post('/', async (req, res, next) => {
       );
       const barberoNombre = barberoResult.rows[0]?.nombre || 'Barbero';
       
-      // Preparar datos para el email
+      //datos para el email
       const datosEmail = {
         ...nuevaCita,
         servicio_nombre: servicio.nombre,
         barbero_nombre: barberoNombre
       };
       
-      // Enviar email de forma asíncrona para no bloquear la respuesta
+      // Enviar email 
       setImmediate(() => {
         enviarEmailConfirmacion(datosEmail);
       });

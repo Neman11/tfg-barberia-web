@@ -39,7 +39,6 @@
   background-color: #18181b;
 }
 
-/* --- CORRECCIÓN 1: Días de la semana siempre en dorado --- */
 .fc .fc-col-header-cell-cushion {
   color: #bfa88b;
   text-decoration: none;
@@ -62,7 +61,6 @@
   font-weight: bold;
 }
 
-/* --- CORRECCIÓN 3: Fondo de la columna de horas --- */
 .fc .fc-timegrid-axis {
     background-color: #18181b;
 }
@@ -72,7 +70,6 @@
   border-color: #3f3f46;
 }
 
-/* --- CORRECCIÓN 2: Horas siempre en dorado --- */
 .fc .fc-timegrid-slot-label-cushion {
   color: #bfa88b;
   text-decoration: none;

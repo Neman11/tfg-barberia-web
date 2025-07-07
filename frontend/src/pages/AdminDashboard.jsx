@@ -10,7 +10,6 @@ import api from '../services/api';
 import '../styles/fullcalendar-dark.css';
 
 /**
- * Función de ayuda para obtener el primer día de la semana (Lunes).
  * @param {Date} date - La fecha a partir de la cual calcular el inicio de la semana.
  * @returns {Date} El objeto Date correspondiente al Lunes de esa semana.
  */
@@ -24,12 +23,12 @@ const getStartOfWeek = (date) => {
 
 // --- 2. Componente Principal ---
 function AdminDashboard() {
-  // --- Hooks y Estado ---
+
   const { user, logout } = useAuth(); 
   const navigate = useNavigate(); 
   const [calendarRef, setCalendarRef] = useState(null); 
 
-  // Estado para almacenar las estadísticas del panel.
+
   const [stats, setStats] = useState({
     today: 0,
     week: 0,
