@@ -29,9 +29,14 @@ const BookingPage = () => {
     cargarDatos();
   }, []);
 
+  // Efecto mejorado para cargar disponibilidad
   useEffect(() => {
     if (selectedBarber && selectedDate && selectedService) {
       cargarDisponibilidad();
+    } else {
+      // Limpiar slots si faltan datos
+      setAvailableSlots([]);
+      setSelectedTime(null);
     }
   }, [selectedBarber, selectedDate, selectedService]);
 
@@ -45,6 +50,7 @@ const BookingPage = () => {
       setServicios(serviciosRes.data);
       setBarberos(barberosRes.data);
     } catch (error) {
+      console.error('Error al cargar datos:', error);
       setError('Error al cargar los datos iniciales. Inténtalo de nuevo más tarde.');
     } finally {
       setLoading(false);
@@ -60,16 +66,42 @@ const BookingPage = () => {
     setSelectedTime(null);
 
     try {
+      // Formatear fecha correctamente
       const fecha = selectedDate.toISOString().split('T')[0];
       
-      const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
-        params: { fecha, duracion: selectedService.duracion_minutos }
+      console.log('Cargando disponibilidad para:', {
+        barbero: selectedBarber,
+        fecha: fecha,
+        duracion: selectedService.duracion_minutos
       });
       
-      const slots = response.data.data || [];
+      const response = await api.get(`/barberos/${selectedBarber}/disponibilidad`, {
+        params: { 
+          fecha: fecha, 
+          duracion: selectedService.duracion_minutos 
+        }
+      });
+      
+      console.log('Respuesta de disponibilidad:', response.data);
+      
+      // Manejar diferentes formatos de respuesta
+      let slots = [];
+      if (response.data.success && response.data.data) {
+        slots = response.data.data;
+      } else if (Array.isArray(response.data.data)) {
+        slots = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        slots = response.data;
+      }
+      
       setAvailableSlots(slots);
       
+      if (slots.length === 0) {
+        console.log('No hay slots disponibles para esta fecha');
+      }
+      
     } catch (error) {
+      console.error('Error al cargar disponibilidad:', error);
       setError('No se pudo cargar la disponibilidad para la fecha seleccionada.');
       setAvailableSlots([]);
     } finally {
@@ -90,14 +122,20 @@ const BookingPage = () => {
   const handleServiceChange = (serviceId) => {
     const service = servicios.find(s => s.id === parseInt(serviceId));
     setSelectedService(service);
+    // Limpiar tiempo seleccionado cuando cambia el servicio
+    setSelectedTime(null);
   };
 
   const handleBarberChange = (barberId) => {
     setSelectedBarber(barberId);
+    // Limpiar tiempo seleccionado cuando cambia el barbero
+    setSelectedTime(null);
   };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    // Limpiar tiempo seleccionado cuando cambia la fecha
+    setSelectedTime(null);
   };
 
   const handleSubmit = async (e) => {
@@ -108,8 +146,17 @@ const BookingPage = () => {
       return;
     }
 
+    // Validar teléfono
+    if (customerData.telefono.length < 9) {
+      setError('El teléfono debe tener al menos 9 dígitos.');
+      return;
+    }
+
     setLoading(true);
+    setError(null);
+    
     try {
+      // Formatear fecha y hora correctamente
       const anio = selectedDate.getFullYear();
       const mes = String(selectedDate.getMonth() + 1).padStart(2, '0'); 
       const dia = String(selectedDate.getDate()).padStart(2, '0');
@@ -125,13 +172,28 @@ const BookingPage = () => {
         cliente_telefono: customerData.telefono
       };
 
-      await api.post('/citas', citaData);
+      console.log('Enviando datos de cita:', citaData);
+
+      const response = await api.post('/citas', citaData);
+      
+      console.log('Cita creada exitosamente:', response.data);
       
       setIsModalOpen(true);
       resetForm();
 
     } catch (error) {
-      setError(error.response?.data?.message || 'Error al crear la reserva. El horario podría no estar disponible.');
+      console.error('Error al crear cita:', error);
+      let errorMessage = 'Error al crear la reserva.';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 409) {
+        errorMessage = 'El horario seleccionado ya no está disponible. Por favor, elige otro horario.';
+        // Recargar disponibilidad para mostrar horarios actualizados
+        cargarDisponibilidad();
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -139,7 +201,7 @@ const BookingPage = () => {
 
   const isWeekday = (date) => {
     const day = date.getDay();
-    return day !== 0;
+    return day !== 0; // Excluir domingos
   };
 
   const minDate = new Date();
@@ -160,8 +222,11 @@ const BookingPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Paso 1: Seleccionar servicio */}
           <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up">
-            <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">1. Elige un servicio</h2>
+            <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">
+              1. Elige un servicio
+            </h2>
             <select
               value={selectedService?.id || ''}
               onChange={(e) => handleServiceChange(e.target.value)}
@@ -177,9 +242,12 @@ const BookingPage = () => {
             </select>
           </div>
 
+          {/* Paso 2: Seleccionar barbero */}
           {selectedService && (
             <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up">
-              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">2. Elige un barbero</h2>
+              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">
+                2. Elige un barbero
+              </h2>
               <select
                 value={selectedBarber || ''}
                 onChange={(e) => handleBarberChange(e.target.value)}
@@ -196,12 +264,17 @@ const BookingPage = () => {
             </div>
           )}
 
+          {/* Paso 3: Seleccionar fecha y hora */}
           {selectedBarber && (
             <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up">
-              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">3. Elige fecha y hora</h2>
+              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">
+                3. Elige fecha y hora
+              </h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-sm font-medium mb-3 text-texto-principal">Fecha</label>
+                  <label className="block text-sm font-medium mb-3 text-texto-principal">
+                    Fecha
+                  </label>
                   <DatePicker
                     selected={selectedDate}
                     onChange={handleDateChange}
@@ -215,10 +288,13 @@ const BookingPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-3 text-texto-principal">Hora disponible</label>
+                  <label className="block text-sm font-medium mb-3 text-texto-principal">
+                    Hora disponible
+                  </label>
                   {availabilityLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <p className="text-texto-secundario">Buscando horas...</p>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-acento"></div>
+                      <p className="text-texto-secundario ml-3">Buscando horarios disponibles...</p>
                     </div>
                   ) : availableSlots.length > 0 ? (
                     <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-2">
@@ -239,7 +315,9 @@ const BookingPage = () => {
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <p className="text-texto-secundario text-center">No hay horas disponibles para este día. Por favor, elige otra fecha.</p>
+                      <p className="text-texto-secundario text-center">
+                        No hay horarios disponibles para este día. Por favor, elige otra fecha.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -247,9 +325,12 @@ const BookingPage = () => {
             </div>
           )}
 
+          {/* Paso 4: Datos del cliente */}
           {selectedTime && (
             <div className="bg-zinc-900 p-8 rounded-lg shadow-xl animate-fade-in-up">
-              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">4. Tus datos</h2>
+              <h2 className="text-2xl font-playfair font-semibold mb-6 text-acento">
+                4. Tus datos
+              </h2>
               <div className="space-y-6">
                 <input
                   type="text"
@@ -271,7 +352,13 @@ const BookingPage = () => {
                   type="tel"
                   placeholder="Teléfono"
                   value={customerData.telefono}
-                  onChange={(e) => setCustomerData({...customerData, telefono: e.target.value})}
+                  onChange={(e) => {
+                    // Solo permitir números
+                    const valor = e.target.value.replace(/\D/g, '');
+                    setCustomerData({...customerData, telefono: valor});
+                  }}
+                  pattern="[0-9]{9,}"
+                  minLength="9"
                   className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-md focus:ring-2 focus:ring-acento focus:border-transparent text-texto-principal"
                   required
                 />
@@ -279,27 +366,35 @@ const BookingPage = () => {
             </div>
           )}
 
+          {/* Botón de envío */}
           <button
             type="submit"
-            disabled={!selectedTime || !customerData.nombre || !customerData.email || loading}
-            className={`w-full py-4 px-6 rounded-md font-semibold text-fondo transition-all duration-300 disabled:bg-zinc-700 disabled:cursor-not-allowed bg-acento hover:bg-acento-hover transform hover:scale-[1.02]`}
+            disabled={!selectedTime || !customerData.nombre || !customerData.email || customerData.telefono.length < 9 || loading}
+            className={`w-full py-4 px-6 rounded-md font-semibold text-fondo transition-all duration-300 ${
+              !selectedTime || !customerData.nombre || !customerData.email || customerData.telefono.length < 9 || loading
+                ? 'bg-zinc-700 cursor-not-allowed'
+                : 'bg-acento hover:bg-acento-hover transform hover:scale-[1.02]'
+            }`}
           >
             {loading ? 'Procesando...' : 'Confirmar Reserva'}
           </button>
         </form>
       </div>
 
+      {/* Modal de confirmación */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <CheckCircleIcon className="w-16 h-16 text-acento mx-auto mb-4" />
-        <h2 className="text-2xl font-playfair font-bold text-texto-principal mb-2">¡Reserva Confirmada!</h2>
+        <h2 className="text-2xl font-playfair font-bold text-texto-principal mb-2">
+          ¡Reserva Confirmada!
+        </h2>
         <p className="text-texto-secundario">
           Tu cita ha sido agendada con éxito. Recibirás un email de confirmación en breve.
         </p>
         <button 
-            onClick={() => setIsModalOpen(false)}
-            className="mt-6 bg-acento text-fondo px-6 py-2 rounded-md hover:opacity-90 transition-opacity"
+          onClick={() => setIsModalOpen(false)}
+          className="mt-6 bg-acento text-fondo px-6 py-2 rounded-md hover:opacity-90 transition-opacity"
         >
-            Cerrar
+          Cerrar
         </button>
       </Modal>
     </>
