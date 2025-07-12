@@ -153,7 +153,21 @@ const fetchStats = useCallback(async () => {
     }
     
     // FullCalendar espera directamente el array de eventos
-    successCallback(eventos);
+    const adjustedEvents = eventos.map(event => {
+      const start = new Date(event.start); 
+      const end = new Date(event.end);
+      
+      start.setHours(start.getHours() + 4);
+      end.setHours(end.getHours() + 4);
+      
+      return {
+        ...event,
+        start: start.toISOString(), 
+        end: end.toISOString()      
+      };
+    });
+
+    successCallback(adjustedEvents);
     
   } catch (error) {
     console.error('Error al cargar las citas:', error);
