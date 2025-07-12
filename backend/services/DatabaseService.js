@@ -90,7 +90,7 @@ class DatabaseService {
           fecha_hora_inicio,
           fecha_hora_fin,
           -- Convertir a hora local para comparación
-          const ahora = new Date();
+          EXTRACT(HOUR FROM fecha_hora_inicio AT TIME ZONE 'Europe/Madrid') as hora_inicio_local,
           EXTRACT(MINUTE FROM fecha_hora_inicio AT TIME ZONE 'Europe/Madrid') as minuto_inicio_local,
           EXTRACT(HOUR FROM fecha_hora_fin AT TIME ZONE 'Europe/Madrid') as hora_fin_local,
           EXTRACT(MINUTE FROM fecha_hora_fin AT TIME ZONE 'Europe/Madrid') as minuto_fin_local
